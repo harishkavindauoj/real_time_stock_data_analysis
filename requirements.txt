@@ -1,0 +1,10 @@
+# Core dependencies
+kafka-python==2.0.2
+influxdb-client==1.36.1
+pandas==2.3.0
+dash==2.14.1
+plotly==5.15.0
+python-dotenv==1.0.0
+
+# Optional: For real stock data
+alpha-vantage==2.3.1
