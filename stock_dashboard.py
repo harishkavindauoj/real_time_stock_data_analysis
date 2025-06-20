@@ -18,19 +18,19 @@ class StockDashboard:
     def __init__(self):
         load_dotenv()
 
-        self.app = dash.Dash(__name__)
-        self.stock_data = {}
-        self.anomalies = []
-        self.setup_layout()
-        self.start_data_consumer()
-
         # Configuration from environment
         self.kafka_servers = os.getenv('KAFKA_SERVERS', 'localhost:9092').split(',')
         self.kafka_topic = os.getenv('KAFKA_TOPIC', 'stock-ticks')
         self.update_interval = int(os.getenv('UPDATE_INTERVAL', 2)) * 1000  # Convert to milliseconds
 
+        self.app = dash.Dash(__name__)
+        self.stock_data = {}
+        self.anomalies = []
+
         self.setup_layout()
         self.start_data_consumer()
+
+
 
     def setup_layout(self):
         """Setup dashboard layout"""
@@ -40,7 +40,7 @@ class StockDashboard:
 
             dcc.Interval(
                 id='interval-component',
-                interval=self.update_interval, # Use env variable
+                interval=self.update_interval,  # Use env variable
                 n_intervals=0
             ),
 
@@ -147,7 +147,6 @@ class StockDashboard:
     def create_price_chart(self):
         """Create live price chart"""
         fig = go.Figure()
-
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
 
         for i, (symbol, data) in enumerate(self.stock_data.items()):
@@ -167,7 +166,6 @@ class StockDashboard:
             hovermode='x unified',
             height=400
         )
-
         return fig
 
     def create_volume_chart(self):
@@ -251,7 +249,6 @@ class StockDashboard:
 
     def setup_callbacks(self):
         """Setup Dash callbacks"""
-
         @callback(
             [Output('live-price-chart', 'figure'),
              Output('volume-chart', 'figure'),
@@ -261,12 +258,12 @@ class StockDashboard:
             [Input('interval-component', 'n_intervals')]
         )
         def update_charts(n):
+            # Create charts (using existing methods)
             price_fig = self.create_price_chart()
             volume_fig = self.create_volume_chart()
             ma_fig = self.create_ma_chart()
             volatility_fig = self.create_volatility_chart()
 
-            # Create anomaly alerts
             # Anomaly detection with configurable threshold
             threshold = float(os.getenv('ANOMALY_THRESHOLD', 5.0))
             alerts = []
@@ -291,13 +288,18 @@ class StockDashboard:
 
             return price_fig, volume_fig, ma_fig, volatility_fig, alerts
 
+    def run(self):
+        """Run the dashboard"""
+        host = os.getenv('DASHBOARD_HOST', '127.0.0.1')
+        port = int(os.getenv('DASHBOARD_PORT', 8050))
+        debug = os.getenv('DASHBOARD_DEBUG', 'True').lower() == 'true'
 
-def run(self):
-    """Run the dashboard"""
-    host = os.getenv('DASHBOARD_HOST', '127.0.0.1')
-    port = int(os.getenv('DASHBOARD_PORT', 8050))
-    debug = os.getenv('DASHBOARD_DEBUG', 'True').lower() == 'true'
+        self.setup_callbacks()
+        print(f"🚀 Starting dashboard at http://{host}:{port}")
+        self.app.run_server(debug=debug, host=host, port=port)
 
-    self.setup_callbacks()
-    print(f"Starting dashboard at http://{host}:{port}")
-    self.app.run_server(debug=debug, host=host, port=port)
+
+if __name__ == "__main__":
+    dashboard = StockDashboard()
+    dashboard.run()
+
