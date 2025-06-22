@@ -31,8 +31,8 @@ Stock Data Producer → Kafka → Analytics Engine → InfluxDB
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd stock-analytics-system
+git clone https://github.com/harishkavindauoj/real_time_stock_data_analysis.git
+cd real_time_stock_data_analysis
 ```
 
 ### 2. Install Python Dependencies
